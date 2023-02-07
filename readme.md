@@ -6,38 +6,20 @@ Alas是[AzurLaneAutoScript](https://github.com/LmeSzinc/AzurLaneAutoScript)
 # setup
 
 **你蓝叠5HyperV不是喜欢变端口吗,劳资给你固定下来**  
+我在最近重建了我的alas映像,提供了我自己的Dockerfile和相关文件,相较于Alas官方历史提供的都具有小得多的磁盘占用,将其覆盖掉`AzurLaneAutoScript/deploy/docker/Dockerfile`然后原地照文件开头注释操作来构建映像  
 在powershell中`echo $profile`查看启动脚本位置,然后把下面的内容追加进去  
 
 ``` PowerShell
 function alas {
     netsh interface portproxy delete v4tov4 55555
     netsh interface portproxy add v4tov4 55555 127.0.0.1 (python PATH_TO_getBs5Port.py MULTIINSTANCE_ID)
-    docker start alas
-    docker exec -it alas alas
+    docker run -v ${PWD}:/alas -p 22267:22267 --name alas -it --rm hgjazhgj/alas
 }
 ```  
 
 `portproxy delete`没有东西可清理时会有一条报错,忽略就行  
-模拟器的adb监听与127.0.0.1:55555建立了全双工转发,因此Alas中「模拟器 Serial」填写`host.docker.internal:55555`  
+将模拟器的adb监听与127.0.0.1:55555建立了全双工转发,因此Alas中「模拟器 Serial」填写`host.docker.internal:55555`  
 按实际情况替换`PATH_TO_getBs5Port.py`和`MULTIINSTANCE_ID`,如果没有多开,就不写`MULTIINSTANCE_ID`参数  
-由于我在大约半年前就完全在docker中运行Alas了,这个容器是使用以下方式手动创建的,相较于Alas官方历史提供的都具有小得多的磁盘占用,这很有可能与你的不同,你需要按需修改上述docker命令,本项目的意义在于展示一个解决方案  
-
-``` bash
-git clone git@github.com:LmeSzinc/AzurLaneAutoScript.git
-docker run -it \
-    --name alas \
-    -v $PWD/AzurLaneAutoScript:/alas \
-    -p 22267:22267 \
-    python:3.7-slim bash
-...install dependencies manually...
-cat > /bin/alas << EOF
-#!/bin/bash
-
-cd /alas
-python gui.py
-
-EOF
-```
 
 # run
 
