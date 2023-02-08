@@ -1,0 +1,24 @@
+# docker build -t hgjazhgj/alas:latest .
+# docker run -v ${PWD}:/alas -p 22267:22267 --name alas -it --rm hgjazhgj/alas
+
+FROM python:3.7-slim
+
+WORKDIR /alas
+
+# AzurLaneAutoScript/deploy/docker/requirements.txt 但是不指定numpy和scipy的版本
+# https://binsitepublic-10018028.file.myqcloud.com/mxnet-1.9.1-py3-none-any.whl from https://www.binss.me/blog/run-azurlaneautoscript-on-arm64/
+COPY requirements.txt mxnet-1.9.1-py3-none-any.whl /tmp/
+
+RUN apt update \
+ && apt install -y git adb netcat gcc libatlas-base-dev libopencv-dev \
+ && ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+ && echo 'Asia/Shanghai' > /etc/timezone \
+ && pip install -r /tmp/requirements.txt \
+ && pip uninstall -y mxnet \
+ && pip install /tmp/mxnet-1.9.1-py3-none-any.whl \
+ && rm /tmp/* \
+ && rm -r ~/.cache/pip
+
+ENV LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/mxnet/"
+
+CMD python gui.py

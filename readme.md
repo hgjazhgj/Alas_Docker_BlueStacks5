@@ -14,12 +14,14 @@ function alas {
     netsh interface portproxy delete v4tov4 55555
     netsh interface portproxy add v4tov4 55555 127.0.0.1 (python PATH_TO_getBs5Port.py MULTIINSTANCE_ID)
     docker run -v ${PWD}:/alas -p 22267:22267 --name alas -it --rm hgjazhgj/alas
+    # ssh -t hgjazhgj@raspberrypi "sudo docker run -v PATH_TO_ALAS:/alas -p 22267:22267 --name alas -it --rm hgjazhgj/alas"
 }
 ```  
 
 `portproxy delete`没有东西可清理时会有一条报错,忽略就行  
 将模拟器的adb监听与127.0.0.1:55555建立了全双工转发,因此Alas中「模拟器 Serial」填写`host.docker.internal:55555`  
 按实际情况替换`PATH_TO_getBs5Port.py`和`MULTIINSTANCE_ID`,如果没有多开,就不写`MULTIINSTANCE_ID`参数  
+当Alas在另一设备上运行时,你可能需要为转发的端口设置防火墙入站规则
 
 # run
 
